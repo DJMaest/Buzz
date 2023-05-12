@@ -25,7 +25,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import customTheme from './buzzTheme';
-import { FAB, Provider as PaperProvider, Appbar } from 'react-native-paper';
+import { FAB, Provider as PaperProvider, Appbar, List } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import PassCard from './components/PassCard';
 
 // type SectionProps = PropsWithChildren<{
 //   title: string;
@@ -58,19 +60,27 @@ import { FAB, Provider as PaperProvider, Appbar } from 'react-native-paper';
 // }
 
 function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
 
   return (
     <PaperProvider theme={customTheme}>
       <SafeAreaView style={styles.container}>
-        <Appbar >
+        <Appbar style={styles.appBar}>
+          
           <Appbar.Content title="Buzz Password Manager" />
+          <Icon name="bluetooth" size={24} style={styles.appBarIcon} />
+
         </Appbar>
+        <ScrollView style={styles.passContainer}>
+          <PassCard title="https://www.google.com" password="*****" />
+          <PassCard title="https://www.facebook.com" password="*****" />
+          <PassCard title="https://www.twitter.com" password="*****" />
+          <PassCard title="https://www.instagram.com" password="*****" />
+          <PassCard title="https://www.linkedin.com" password="*****" />
+          <PassCard title="https://www.github.com" password="*****" />
+          <PassCard title="https://www.youtube.com" password="*****" />
+          <PassCard title="https://www.netflix.com" password="*****" />
+          <PassCard title="https://www.spotify.com" password="*****" />
+        </ScrollView>
         <FAB
           icon="plus"
           style={styles.fab}
@@ -92,6 +102,16 @@ const styles = StyleSheet.create({
     right: 16,
     bottom: 16,
   },
+  passContainer:{
+    margin: 5
+  },
+  appBar:{
+    flexDirection: 'row',
+  },
+  appBarIcon:{
+    marginRight: 8,
+    color:'blue'
+  }
 });
 
 export default App;
