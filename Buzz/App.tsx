@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
 
@@ -28,13 +28,20 @@ import customTheme from './buzzTheme';
 import { FAB, Provider as PaperProvider, Appbar, List, Portal, Button, Modal, Text, TextInput, Searchbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PassCard from './components/PassCard';
-
+import DatabaseHandler from './model/Credential';
 
 function App(): JSX.Element {
-  const [visible, setVisible] = React.useState(false);
-
+  const [visible, setVisible] = React.useState<boolean>(false);
+  const [userNameText, setUserNameText] = React.useState<string>('');
+  const [passwordText, setPasswordText] = React.useState<string>('');
+  const [urlText, setUrlText] = React.useState<string>('');
+  const [searchText, setSearchText] = React.useState<string>('');
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
+  
+  useEffect(() => {
+    const db = new DatabaseHandler();
+  },[]);
 
   return (
     <PaperProvider theme={customTheme}>
@@ -46,7 +53,7 @@ function App(): JSX.Element {
           {/* <Icon name="bluetooth" size={24} style={styles.appBarIcon} /> */}
 
         </Appbar>
-        <Searchbar style={styles.searchBar} placeholder='Search for credentials' value='' />
+        <Searchbar style={styles.containerInput} onChangeText={setSearchText} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
         <ScrollView style={styles.passContainer}>
       
           <PassCard title="https://www.google.com" password="*****" />
@@ -68,9 +75,9 @@ function App(): JSX.Element {
 
       <Portal>
         <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
-          <TextInput value='' placeholder='Enter URL' label="URL" />
-          <TextInput value='' placeholder='Enter Username' label="Username" />
-          <TextInput value='' placeholder='Enter Password' label="Password" secureTextEntry={true} />
+          <TextInput style={styles.containerInput} onChangeText={setUrlText} value={urlText} placeholder='Enter URL' label="URL" />
+          <TextInput style={styles.containerInput} onChangeText={setUserNameText} value={userNameText} placeholder='Enter Username' label="Username" />
+          <TextInput style={styles.containerInput} onChangeText={setPasswordText} value={passwordText} placeholder='Enter Password' label="Password" secureTextEntry={true} />
           <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Add </Button>
           <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Cancel </Button>
         </Modal>
@@ -107,6 +114,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   containerBtn: {
+    margin: 5
+  },
+  containerInput: {
     margin: 5
   },
   searchBar:{
