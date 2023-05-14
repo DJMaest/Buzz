@@ -8,11 +8,11 @@
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import {
+
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
   useColorScheme,
   View,
 } from 'react-native';
@@ -25,52 +25,30 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import customTheme from './buzzTheme';
-import { FAB, Provider as PaperProvider, Appbar, List } from 'react-native-paper';
+import { FAB, Provider as PaperProvider, Appbar, List, Portal, Button, Modal, Text, TextInput, Searchbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PassCard from './components/PassCard';
 
-// type SectionProps = PropsWithChildren<{
-//   title: string;
-// }>;
-
-// function Section({children, title}: SectionProps): JSX.Element {
-//   const isDarkMode = useColorScheme() === 'dark';
-//   return (
-//     <View style={styles.sectionContainer}>
-//       <Text
-//         style={[
-//           styles.sectionTitle,
-//           {
-//             color: isDarkMode ? Colors.white : Colors.black,
-//           },
-//         ]}>
-//         {title}
-//       </Text>
-//       <Text
-//         style={[
-//           styles.sectionDescription,
-//           {
-//             color: isDarkMode ? Colors.light : Colors.dark,
-//           },
-//         ]}>
-//         {children}
-//       </Text>
-//     </View>
-//   );
-// }
 
 function App(): JSX.Element {
+  const [visible, setVisible] = React.useState(false);
+
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
 
   return (
     <PaperProvider theme={customTheme}>
       <SafeAreaView style={styles.container}>
         <Appbar style={styles.appBar}>
-          
+
           <Appbar.Content title="Buzz Password Manager" />
-          <Icon name="bluetooth" size={24} style={styles.appBarIcon} />
+          {/* TODO: BLE sync feature coming in next release  */}
+          {/* <Icon name="bluetooth" size={24} style={styles.appBarIcon} /> */}
 
         </Appbar>
+        <Searchbar style={styles.searchBar} placeholder='Search for credentials' value='' />
         <ScrollView style={styles.passContainer}>
+      
           <PassCard title="https://www.google.com" password="*****" />
           <PassCard title="https://www.facebook.com" password="*****" />
           <PassCard title="https://www.twitter.com" password="*****" />
@@ -84,9 +62,19 @@ function App(): JSX.Element {
         <FAB
           icon="plus"
           style={styles.fab}
-          onPress={() => console.log('Pressed')}
+          onPress={() => showModal()}
         />
       </SafeAreaView>
+
+      <Portal>
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
+          <TextInput value='' placeholder='Enter URL' label="URL" />
+          <TextInput value='' placeholder='Enter Username' label="Username" />
+          <TextInput value='' placeholder='Enter Password' label="Password" secureTextEntry={true} />
+          <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Add </Button>
+          <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Cancel </Button>
+        </Modal>
+      </Portal>
     </PaperProvider>
 
   );
@@ -102,16 +90,29 @@ const styles = StyleSheet.create({
     right: 16,
     bottom: 16,
   },
-  passContainer:{
+  passContainer: {
     margin: 5
   },
-  appBar:{
+  appBar: {
     flexDirection: 'row',
   },
-  appBarIcon:{
+  appBarIcon: {
     marginRight: 8,
-    color:'blue'
+    color: 'blue'
+  },
+  containerStyle: {
+    backgroundColor: 'white',
+    padding: 20,
+    width: '80%',
+    alignSelf: 'center',
+  },
+  containerBtn: {
+    margin: 5
+  },
+  searchBar:{
+    margin: 5
   }
+
 });
 
 export default App;
