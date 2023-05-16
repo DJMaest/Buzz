@@ -3,7 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { Card, Title, Paragraph, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type Props = {
-    title: string;
+
+    url: string;
+    username: string;
     password: string;
 };
 
@@ -24,8 +26,8 @@ const styles = StyleSheet.create({
     passInfoContainer: {
         flexDirection: 'column',
     },
-    passFieldContainer: {
-        flexDirection: 'row',
+    dataFieldContainer: {
+        flexDirection: 'column',
         flex: 1,
     },
     passField: {
@@ -37,25 +39,38 @@ const styles = StyleSheet.create({
     viewIcon: {
         marginLeft: 8,
         marginTop: 9,
+
+    },
+    passFieldContainer: {
+        flexDirection: 'row',
     }
 });
 
 function PassCard(props: Props): JSX.Element {
-    const { title, password } = props;
+    const { url, username, password } = props;
     return (
         <Card style={styles.container}>
             <Card.Content style={styles.content}>
                 <Icon name="form-textbox-password" size={24} style={styles.icon} />
                 <View style={styles.passInfoContainer}>
-                    <Title>{title}</Title>
-                    <View style={styles.passFieldContainer}>
+                    <Title>{url}</Title>
+                    <View style={styles.dataFieldContainer}>
                         <TextInput
                             style={styles.passField}
                             disabled={true}
-                            secureTextEntry={true}
-                            value={password}
+                            secureTextEntry={false}
+                            value={username}
                         />
-                        <Icon name="eye" size={24} style={styles.viewIcon} />
+                        <View style={styles.passFieldContainer}>
+                            <TextInput
+                                style={styles.passField}
+                                disabled={true}
+                                secureTextEntry={true}
+                                value={password}
+                            />
+                            <Icon name="eye" size={24} style={styles.viewIcon} />
+                        </View>
+
                     </View>
                 </View>
             </Card.Content>

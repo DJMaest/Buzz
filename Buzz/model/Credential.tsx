@@ -22,9 +22,39 @@ class DatabaseHandler {
         console.log("Database OPENED");
     }
 
-    errorCB(err: SQLite.SQLError) {
+    successCB() {
+        console.log("SQL executed fine");
+    }
+
+    errorCB(err: any) {
         console.log("SQL Error: " + err);
     }
+
+    createTable() {
+        this.db.transaction((tx: SQLite.Transaction) => {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS Creds (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, username TEXT, password TEXT);',
+                [], this.errorCB, this.successCB);
+        });
+    }
+    insertData(url: string, username: string, password: string) {
+        this.db.transaction((tx: SQLite.Transaction) => {
+            tx.executeSql('INSERT INTO Creds (url, username, password) VALUES (?,?,?)',
+                [url, username, password], this.errorCB, this.successCB);
+        });
+    }
+
+    getAllData(callback: (data: any) => void) {
+        // without promise
+        this.db.transaction((tx: SQLite.Transaction) => { 
+            tx.executeSql('SELECT * FROM Creds', [], (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
+                console.log(results.rows.raw());
+                callback(results.rows.raw());
+            });
+        }, this.errorCB, this.successCB);
+
+    }
+
+
 
 
 }

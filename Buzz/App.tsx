@@ -36,11 +36,16 @@ function App(): JSX.Element {
   const [passwordText, setPasswordText] = React.useState<string>('');
   const [urlText, setUrlText] = React.useState<string>('');
   const [searchText, setSearchText] = React.useState<string>('');
+  const [passData, setPassData] = React.useState<any[]>([]);
+
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
   
   useEffect(() => {
     const db = new DatabaseHandler();
+    db.createTable();
+    // db.insertData('https://www.google.com', 'test', 'test');
+    db.getAllData((data: any) => setPassData(data));
   },[]);
 
   return (
@@ -53,18 +58,9 @@ function App(): JSX.Element {
           {/* <Icon name="bluetooth" size={24} style={styles.appBarIcon} /> */}
 
         </Appbar>
-        <Searchbar style={styles.containerInput} onChangeText={setSearchText} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
+        <Searchbar onChangeText={setSearchText} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
         <ScrollView style={styles.passContainer}>
-      
-          <PassCard title="https://www.google.com" password="*****" />
-          <PassCard title="https://www.facebook.com" password="*****" />
-          <PassCard title="https://www.twitter.com" password="*****" />
-          <PassCard title="https://www.instagram.com" password="*****" />
-          <PassCard title="https://www.linkedin.com" password="*****" />
-          <PassCard title="https://www.github.com" password="*****" />
-          <PassCard title="https://www.youtube.com" password="*****" />
-          <PassCard title="https://www.netflix.com" password="*****" />
-          <PassCard title="https://www.spotify.com" password="*****" />
+          {passData !==undefined && passData.map((item: any) => { return <PassCard key={item.id} url={item.url} username={item.username} password={item.password} /> })}
         </ScrollView>
         <FAB
           icon="plus"
