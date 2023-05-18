@@ -30,8 +30,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PassCard from './components/PassCard';
 import DatabaseHandler from './model/Credential';
 
+
 function App(): JSX.Element {
   const [visible, setVisible] = React.useState<boolean>(false);
+  const [deleteVisible, setDeleteVisible] = React.useState<boolean>(false);
   const [userNameText, setUserNameText] = React.useState<string>('');
   const [passwordText, setPasswordText] = React.useState<string>('');
   const [urlText, setUrlText] = React.useState<string>('');
@@ -40,6 +42,8 @@ function App(): JSX.Element {
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
+  const hideDeleteModal = () => setDeleteVisible(false);
+  const showDeleteModal = () => console.log("show delete modal");
   
   useEffect(() => {
     const db = new DatabaseHandler();
@@ -60,7 +64,7 @@ function App(): JSX.Element {
         </Appbar>
         <Searchbar onChangeText={setSearchText} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
         <ScrollView style={styles.passContainer}>
-          {passData !==undefined && passData.map((item: any) => { return <PassCard key={item.id} url={item.url} username={item.username} password={item.password} /> })}
+          {passData !==undefined && passData.map((item: any) => { return <PassCard showDeleteModal={showDeleteModal} key={item.id} url={item.url} username={item.username} password={item.password} /> })}
         </ScrollView>
         <FAB
           icon="plus"
@@ -78,6 +82,13 @@ function App(): JSX.Element {
           <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Cancel </Button>
         </Modal>
       </Portal>
+
+
+      <Modal visible={deleteVisible} onDismiss={hideDeleteModal} contentContainerStyle={styles.containerStyle}>
+                <Text variant='displaySmall'>Are you sure you want to delete credential?</Text>
+                <Button style={styles.containerBtn} mode="contained" onPress={() => hideDeleteModal()}> Add </Button>
+                <Button style={styles.containerBtn} mode="contained" onPress={() => hideDeleteModal()}> Cancel </Button>
+      </Modal>
     </PaperProvider>
 
   );
