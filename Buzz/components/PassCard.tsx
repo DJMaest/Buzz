@@ -7,7 +7,8 @@ type Props = {
     url: string;
     username: string;
     password: string;
-    showDeleteModal: ()=>void;
+    btnKey: number;
+    showDeleteModal: () => void;
 };
 
 const styles = StyleSheet.create({
@@ -15,7 +16,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'black',
         margin: 8,
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
     content: {
         flexDirection: 'row',
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
     },
     passInfoContainer: {
         flexDirection: 'column',
-        width: '70%',
+        width: '80%',
     },
     dataFieldContainer: {
         flexDirection: 'column',
@@ -48,18 +49,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     editDeleteContainer: {
-        flexDirection: 'column',
-        height: '100%',
+        flexDirection: 'row',
+        alignContent: 'flex-start',
     },
     deleteIcon: {
-        marginLeft: 30,
-        marginBottom: 10,
-        marginTop: -10
+        marginLeft: 0,
     },
     editIcon: {
-        marginLeft: 30,
-        marginBottom: -10,
-        marginTop: 30
     },
     modalContainer: {
         backgroundColor: 'white',
@@ -102,15 +98,13 @@ function PassCard(props: Props): JSX.Element {
                             </View>
 
                         </View>
-                    </View>
-                    <View style={styles.editDeleteContainer}>
-                        <IconButton style={styles.deleteIcon} iconColor='red' icon="trash-can-outline" size={24} onPress={() => props.showDeleteModal()} />
-                        <IconButton style={styles.editIcon} iconColor='green' icon="pencil" size={24} onPress={() => console.log('Pressed')} />
-
+                        <View style={styles.editDeleteContainer}>
+                            <IconButton style={styles.deleteIcon} iconColor='red' icon="trash-can-outline" size={24} onPress={() => props.showDeleteModal()} />
+                            <IconButton key={props.btnKey} style={styles.editIcon} iconColor='green' icon="pencil" size={24} onPress={() => console.log('Pressed')} />
+                        </View>
                     </View>
                 </Card.Content>
             </Card>
-
         </>
 
     );

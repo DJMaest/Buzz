@@ -43,14 +43,14 @@ function App(): JSX.Element {
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
   const hideDeleteModal = () => setDeleteVisible(false);
-  const showDeleteModal = () => console.log("show delete modal");
-  
+  const showDeleteModal = () => setDeleteVisible(true);
+
   useEffect(() => {
     const db = new DatabaseHandler();
     db.createTable();
     // db.insertData('https://www.google.com', 'test', 'test');
     db.getAllData((data: any) => setPassData(data));
-  },[]);
+  }, []);
 
   return (
     <PaperProvider theme={customTheme}>
@@ -64,7 +64,7 @@ function App(): JSX.Element {
         </Appbar>
         <Searchbar onChangeText={setSearchText} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
         <ScrollView style={styles.passContainer}>
-          {passData !==undefined && passData.map((item: any) => { return <PassCard showDeleteModal={showDeleteModal} key={item.id} url={item.url} username={item.username} password={item.password} /> })}
+          {passData !== undefined && passData.map((item: any) => { return <PassCard btnKey={item} showDeleteModal={showDeleteModal} key={item.id} url={item.url} username={item.username} password={item.password} /> })}
         </ScrollView>
         <FAB
           icon="plus"
@@ -83,12 +83,14 @@ function App(): JSX.Element {
         </Modal>
       </Portal>
 
+      <Portal>
+        <Modal visible={deleteVisible} onDismiss={hideDeleteModal} contentContainerStyle={styles.containerStyle}>
+          <Text style={{ fontSize: 15, margin: 5 }} variant='labelSmall'>Are you sure you want to delete credential?</Text>
+          <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={() => hideDeleteModal()}> Delete </Button>
+          <Button buttonColor={customTheme.colors.secondary} style={styles.containerBtn} mode="contained" onPress={() => hideDeleteModal()}> Cancel </Button>
+        </Modal>
+      </Portal>
 
-      <Modal visible={deleteVisible} onDismiss={hideDeleteModal} contentContainerStyle={styles.containerStyle}>
-                <Text variant='displaySmall'>Are you sure you want to delete credential?</Text>
-                <Button style={styles.containerBtn} mode="contained" onPress={() => hideDeleteModal()}> Add </Button>
-                <Button style={styles.containerBtn} mode="contained" onPress={() => hideDeleteModal()}> Cancel </Button>
-      </Modal>
     </PaperProvider>
 
   );
@@ -119,6 +121,7 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '80%',
     alignSelf: 'center',
+    borderRadius: 10
   },
   containerBtn: {
     margin: 5
@@ -126,7 +129,7 @@ const styles = StyleSheet.create({
   containerInput: {
     margin: 5
   },
-  searchBar:{
+  searchBar: {
     margin: 5
   }
 
