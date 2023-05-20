@@ -53,8 +53,21 @@ class DatabaseHandler {
         }, this.errorCB, this.successCB);
 
     }
+    filterData(query: string, callback: (data: any) => void) {  
+        // search for matching url or username
+        this.db.transaction((tx: SQLite.Transaction) => {   
+            tx.executeSql('SELECT * FROM Creds WHERE url LIKE ? OR username LIKE ?', ['%'+query+'%', '%'+query+'%'], (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
+                console.log(results.rows.raw());
+                callback(results.rows.raw());
+            });
+        })
+    }
 
-
+    deleteData(id: number) {
+        this.db.transaction((tx: SQLite.Transaction) => {
+            tx.executeSql('DELETE FROM Creds WHERE id=?', [id], this.errorCB, this.successCB);
+        });
+    }
 
 
 }

@@ -9,6 +9,7 @@ type Props = {
     password: string;
     btnKey: number;
     showDeleteModal: () => void;
+    showEditModal: () => void;
 };
 
 const styles = StyleSheet.create({
@@ -41,9 +42,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     viewIcon: {
-        marginLeft: 8,
-        marginTop: 9,
-
+        margin:0
     },
     passFieldContainer: {
         flexDirection: 'row',
@@ -73,6 +72,13 @@ const styles = StyleSheet.create({
 
 function PassCard(props: Props): JSX.Element {
     const { url, username, password } = props;
+    const [eyeIcon, setEyeIcon] = React.useState('eye');
+    const [visible, setVisible] = React.useState(true);
+
+    function viewPass(){
+        setEyeIcon(eyeIcon === 'eye'? 'eye-off': 'eye');
+        setVisible(!visible);
+    }
     return (
         <>
             <Card style={styles.container}>
@@ -91,16 +97,18 @@ function PassCard(props: Props): JSX.Element {
                                 <TextInput
                                     style={styles.passField}
                                     disabled={true}
-                                    secureTextEntry={true}
+                                    secureTextEntry={visible}
                                     value={password}
                                 />
-                                <Icon name="eye" size={24} style={styles.viewIcon} />
+                                {/* Use Icon button */}
+                                <IconButton style={styles.viewIcon} iconColor='black' icon={eyeIcon} size={24} onPress={() => viewPass() } />
+
                             </View>
 
                         </View>
                         <View style={styles.editDeleteContainer}>
                             <IconButton style={styles.deleteIcon} iconColor='red' icon="trash-can-outline" size={24} onPress={() => props.showDeleteModal()} />
-                            <IconButton key={props.btnKey} style={styles.editIcon} iconColor='green' icon="pencil" size={24} onPress={() => console.log('Pressed')} />
+                            <IconButton key={props.btnKey} style={styles.editIcon} iconColor='green' icon="pencil" size={24} onPress={() => props.showEditModal()} />
                         </View>
                     </View>
                 </Card.Content>
