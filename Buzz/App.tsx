@@ -28,28 +28,40 @@ import customTheme from './buzzTheme';
 import {
   FAB, Provider as PaperProvider, Appbar, List,
   Portal, Button, Modal, Text, TextInput, Searchbar,
-  Snackbar
+  Snackbar, IconButton
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PassCard from './components/PassCard';
 import DatabaseHandler from './model/Credential';
+type EditData = {
+  url: string;
+  username: string;
+  password: string;
+  id: number;
+}
 
+type AddData = {
+  url: string;
+  username: string;
+  password: string;
+}
 
 function App(): JSX.Element {
   const [visible, setVisible] = React.useState<boolean>(false);
   const [deleteVisible, setDeleteVisible] = React.useState<boolean>(false);
-  const [userNameText, setUserNameText] = React.useState<string>('');
-  const [passwordText, setPasswordText] = React.useState<string>('');
+  // const [userNameText, setUserNameText] = React.useState<string>('');
+  // const [passwordText, setPasswordText] = React.useState<string>('');
   const [deleteId, setDeleteId] = React.useState<number>(-1);
-  const [urlText, setUrlText] = React.useState<string>('');
+  const [addData, setAddData] = React.useState<AddData>({ url: '', username: '', password: '' });
+  // const [urlText, setUrlText] = React.useState<string>('');
   const [searchText, setSearchText] = React.useState<string>('');
   const [passData, setPassData] = React.useState<any[]>([]);
   const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
-  const [urlEditText, setUrlEditText] = React.useState<string>('');
-  const [usernameEditText, setUsernameEditText] = React.useState<string>('');
-  const [passwordEditText, setPasswordEditText] = React.useState<string>('');
+  // combine the edit text into a signle object state
+  const [editData, setEditData] = React.useState<EditData>({ url: '', username: '', password: '', id: -1 });
   const [editVisible, setEditVisible] = React.useState<boolean>(false);
-
+  const [eyeIcon, setEyeIcon] = React.useState('eye');
+  const [visibleEye, setVisibleEye] = React.useState<boolean>(true);
   const db = new DatabaseHandler();
   useEffect(() => {
     db.createTable();
@@ -60,22 +72,39 @@ function App(): JSX.Element {
   }, []);
 
   const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
+  // const hideModal = () => setVisible(false);
+  function hideModal() {
+    setVisible(false);
+    setAddData({url: '', username: '', password: ''});
+    // setUserNameText('');
+    // setPasswordText('');
+  }
   const hideDeleteModal = () => setDeleteVisible(false);
   function showDeleteModal(id: number) {
     setDeleteId(id);
     setDeleteVisible(true);
   }
+  function setUrlEditText(text: string) {
+    setEditData({ ...editData, url: text });
+  }
+  function setUsernameEditText(text: string) {
+    setEditData({ ...editData, username: text });
+  }
+  function setPasswordEditText(text: string) {
+    setEditData({ ...editData, password: text });
+  }
 
   function hideEditModal() {
     setEditVisible(false);
-    setUrlEditText('');
-    setUsernameEditText('');
-    setPasswordEditText('');
+    setEditData({ url: '', username: '', password: '', id: -1 });
+    // setUrlEditText('');
+    // setUsernameEditText('');
+    // setPasswordEditText('');
   }
 
-  function showEditModal() {
+  function showEditModal(editData: EditData) {
     // setDeleteId(id);
+    setEditData(editData);
     setEditVisible(true);
   }
 
@@ -85,6 +114,10 @@ function App(): JSX.Element {
     hideDeleteModal();
   }
 
+  function viewPass(){
+    setEyeIcon(eyeIcon === 'eye'? 'eye-off': 'eye');
+    setVisibleEye(!visibleEye);
+}
 
 
   function filterCredential(text: string): void {
@@ -97,6 +130,12 @@ function App(): JSX.Element {
 
   }
 
+  function editCredential(): void {
+    db.updateData(editData.id, editData.url, editData.username, editData.password);
+    filterCredential(searchText);
+    hideEditModal();
+  }
+
   function addCredential(url: string, username: string, password: string): void {
     if (url === '' || username === '' || password === '') {
       setSnackbarVisible(true);
@@ -105,9 +144,17 @@ function App(): JSX.Element {
     db.insertData(url, username, password);
     filterCredential(searchText);
     hideModal();
-    setUrlText('');
-    setUserNameText('');
-    setPasswordText('');
+    setAddData({ url: '', username: '', password: '' });
+  }
+
+  function setUrlText(text: string) {
+    setAddData({ ...addData, url: text });
+  }
+  function setUserNameText(text: string) {
+    setAddData({ ...addData, username: text });
+  }
+  function setPasswordText(text: string) { 
+    setAddData({ ...addData, password: text });
   }
 
   return (
@@ -126,7 +173,7 @@ function App(): JSX.Element {
             return <PassCard
               btnKey={item}
               showDeleteModal={() => showDeleteModal(item.id)}
-              showEditModal={() => showEditModal()}
+              showEditModal={() => showEditModal({ url: item.url, username: item.username, password: item.password, id: item.id })}
               key={item.id}
               url={item.url}
               username={item.username}
@@ -143,10 +190,14 @@ function App(): JSX.Element {
       {/* Add modal */}
       <Portal>
         <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
-          <TextInput style={styles.containerInput} onChangeText={setUrlText} value={urlText} placeholder='Enter URL' label="URL" />
-          <TextInput style={styles.containerInput} onChangeText={setUserNameText} value={userNameText} placeholder='Enter Username' label="Username" />
-          <TextInput style={styles.containerInput} onChangeText={setPasswordText} value={passwordText} placeholder='Enter Password' label="Password" secureTextEntry={true} />
-          <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={() => addCredential(urlText, userNameText, passwordText)}> Add </Button>
+          <TextInput style={styles.containerInput} onChangeText={setUrlText} value={addData.url} placeholder='Enter URL' label="URL" />
+          <TextInput style={styles.containerInput} onChangeText={setUserNameText} value={addData.username} placeholder='Enter Username' label="Username" />
+          <View style={styles.passFieldContainer}>
+            <TextInput style={styles.passInput} onChangeText={setPasswordText} value={addData.password} placeholder='Enter Password' label="Password" secureTextEntry={visibleEye} />
+            <IconButton style={styles.viewIcon} iconColor='black' icon={eyeIcon} size={24} onPress={() => viewPass() } />
+          </View>
+
+          <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={() => addCredential(addData.url, addData.username, addData.password)}> Add </Button>
           <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Cancel </Button>
         </Modal>
       </Portal>
@@ -174,10 +225,14 @@ function App(): JSX.Element {
       {/* Edit modal */}
       <Portal>
         <Modal visible={editVisible} onDismiss={hideEditModal} contentContainerStyle={styles.containerStyle}>
-          <TextInput style={styles.containerInput} onChangeText={setUrlEditText} value={urlEditText} placeholder='Enter URL' label="URL" />
-          <TextInput style={styles.containerInput} onChangeText={setUsernameEditText} value={usernameEditText} placeholder='Enter Username' label="Username" />
-          <TextInput style={styles.containerInput} onChangeText={setPasswordEditText} value={passwordEditText} placeholder='Enter Password' label="Password" secureTextEntry={true} />
-          <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={() => console.log('pressed')}> Save </Button>
+          <TextInput style={styles.containerInput} onChangeText={setUrlEditText} value={editData.url} placeholder='Enter URL' label="URL" />
+          <TextInput style={styles.containerInput} onChangeText={setUsernameEditText} value={editData.username} placeholder='Enter Username' label="Username" />
+          <View style={styles.passFieldContainer}>
+            <TextInput style={styles.passInput} onChangeText={setPasswordEditText} value={editData.password} placeholder='Enter Password' label="Password" secureTextEntry={visibleEye} />
+            <IconButton style={styles.viewIcon} iconColor='black' icon={eyeIcon} size={24} onPress={() => viewPass() } />
+          </View>
+
+          <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={() => editCredential()}> Save </Button>
           <Button style={styles.containerBtn} mode="contained" onPress={() => hideEditModal()}> Cancel </Button>
         </Modal>
       </Portal>
@@ -209,7 +264,7 @@ const styles = StyleSheet.create({
   containerStyle: {
     backgroundColor: 'white',
     padding: 20,
-    width: '80%',
+    width: '90%',
     alignSelf: 'center',
     borderRadius: 10
   },
@@ -217,10 +272,22 @@ const styles = StyleSheet.create({
     margin: 5
   },
   containerInput: {
-    margin: 5
+    margin: 5,
   },
   searchBar: {
     margin: 5
+  },
+  passFieldContainer: {
+    flexDirection: 'row',
+    width: '100%',
+  },
+  viewIcon: {
+    margin: 0,
+    marginTop: 10,
+  },
+  passInput:{
+    width: '80%',
+    margin: 5,
   }
 
 });

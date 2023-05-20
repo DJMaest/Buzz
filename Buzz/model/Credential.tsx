@@ -19,15 +19,15 @@ class DatabaseHandler {
     }
 
     openCB() {
-        console.log("Database OPENED");
+        // console.log("Database OPENED");
     }
 
     successCB() {
-        console.log("SQL executed fine");
+        // console.log("SQL executed fine");
     }
 
     errorCB(err: any) {
-        console.log("SQL Error: " + err);
+        // console.log("SQL Error: " + err);
     }
 
     createTable() {
@@ -47,7 +47,7 @@ class DatabaseHandler {
         // without promise
         this.db.transaction((tx: SQLite.Transaction) => { 
             tx.executeSql('SELECT * FROM Creds', [], (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
-                console.log(results.rows.raw());
+                // console.log(results.rows.raw());
                 callback(results.rows.raw());
             });
         }, this.errorCB, this.successCB);
@@ -57,7 +57,7 @@ class DatabaseHandler {
         // search for matching url or username
         this.db.transaction((tx: SQLite.Transaction) => {   
             tx.executeSql('SELECT * FROM Creds WHERE url LIKE ? OR username LIKE ?', ['%'+query+'%', '%'+query+'%'], (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
-                console.log(results.rows.raw());
+                // console.log(results.rows.raw());
                 callback(results.rows.raw());
             });
         })
@@ -66,6 +66,13 @@ class DatabaseHandler {
     deleteData(id: number) {
         this.db.transaction((tx: SQLite.Transaction) => {
             tx.executeSql('DELETE FROM Creds WHERE id=?', [id], this.errorCB, this.successCB);
+        });
+    }
+
+    updateData(id: number, url: string, username: string, password: string) {
+        this.db.transaction((tx: SQLite.Transaction) => {
+            tx.executeSql('UPDATE Creds SET url=?, username=?, password=? WHERE id=?',
+                [url, username, password, id], this.errorCB, this.successCB);
         });
     }
 
