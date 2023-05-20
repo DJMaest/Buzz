@@ -46,8 +46,7 @@ class DatabaseHandler {
     getAllData(callback: (data: any) => void) {
         // without promise
         this.db.transaction((tx: SQLite.Transaction) => { 
-            tx.executeSql('SELECT * FROM Creds', [], (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
-                // console.log(results.rows.raw());
+            tx.executeSql('SELECT * FROM Creds ORDER BY id DESC', [], (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
                 callback(results.rows.raw());
             });
         }, this.errorCB, this.successCB);
