@@ -17,8 +17,6 @@ class DatabaseHandler {
     constructor() {
         // open database
         this.db = SQLite.openDatabase({ name: database_name, location:'default' }, this.openCB, this.errorCB);
-        // this.encryptionKey = key;
-        // console.log(SQLite);
     }
     setEncryptionKey(key: string) {
         this.encryptionKey = key;
@@ -62,7 +60,6 @@ class DatabaseHandler {
                         url: item.url,
                         username: item.username,
                         password: await Encryption.decryptData(JSON.parse(item.password), encryptionKey)
-                        // password: item.password
                     }
                 }));
 
@@ -75,14 +72,12 @@ class DatabaseHandler {
         // search for matching url or username
         this.db.transaction((tx: SQLite.Transaction) => {   
             tx.executeSql('SELECT * FROM Creds WHERE url LIKE ? OR username LIKE ?', ['%'+query+'%', '%'+query+'%'], async (tx: SQLite.Transaction, results: SQLite.ResultSet) => {
-                // console.log(results.rows.raw());
                 const result = await Promise.all((results.rows.raw()).map(async (item: any) => {
                     return {
                         id: item.id,
                         url: item.url,
                         username: item.username,
                         password: await Encryption.decryptData(JSON.parse(item.password), encryptionKey)
-                        // password: item.password
                     }
                 }));
 
