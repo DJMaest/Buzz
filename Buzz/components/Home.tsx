@@ -125,10 +125,13 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
             setSnackbarVisible(true);
             return;
         }
-        const encryptedPassword = JSON.stringify(await Encryption.encryptData(editData.password, encryptionKey));
-        db.updateData(editData.id, editData.url, editData.username, encryptedPassword);
-        filterCredential(searchText);
-        hideEditModal();
+        Encryption.getKey().then(async (key) => {
+            const encryptedPassword = JSON.stringify(await Encryption.encryptData(editData.password, key!));
+            db.updateData(editData.id, editData.url, editData.username, encryptedPassword);
+            filterCredential(searchText);
+            hideEditModal();
+        })
+
 
     }
 
