@@ -177,17 +177,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
     return (
         <PaperProvider theme={customTheme}>
             <SafeAreaView style={styles.container}>
-                <Appbar style={styles.appBar}>
 
-                    <Appbar.Content color={customTheme.colors.primary} title="Buzz" />
-
-                    {/* TODO: BLE sync feature coming in next release  */}
-                    {/* <Icon color={customTheme.colors.primary} name="logout" size={24} style={styles.appBarIcon} /> */}
-                    <IconButton iconColor={customTheme.colors.primary} icon="logout" size={24} onPress={() => {
-                        navigation.dispatch(StackActions.popToTop())
-                    }} />
-
-                </Appbar>
                 <Searchbar onChangeText={filterCredential} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
                 <ScrollView style={styles.passContainer}>
                     {passData !== undefined && passData.map((item: any) => {
