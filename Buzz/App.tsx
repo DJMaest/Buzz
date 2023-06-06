@@ -13,7 +13,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 type StackParamList = {
   Login: undefined;
-  Home: undefined;
+  HomeTabs: undefined;
 };
 
 const Stack = createNativeStackNavigator<StackParamList>();
@@ -24,7 +24,7 @@ function App(): JSX.Element {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen options={{title:"Access"}}  name="Login" component={Login} />
-        <Stack.Screen options={{headerShown: DEBUG_MODE}} name="Home" component={HomeTabs} />
+        <Stack.Screen options={{headerShown: DEBUG_MODE}} name="HomeTabs" component={HomeTabs} />
       </Stack.Navigator>
     </NavigationContainer>
 
