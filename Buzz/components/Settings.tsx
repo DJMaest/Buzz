@@ -1,19 +1,58 @@
 // Create settings component using react-native-paper
 import React from 'react';
 import { View, Text, StyleSheet, Modal } from 'react-native';
-import { TextInput, Button, Portal, ProgressBar, MD3Colors } from 'react-native-paper';
+import { TextInput, Button, ProgressBar, MD3Colors } from 'react-native-paper';
 import customTheme from '../buzzTheme';
+import BackgroundFetch from "react-native-background-fetch";
+import Encryption from '../model/Encryption';
+import DatabaseHandler from '../model/Credential';
+import Notification from './Notification';
+import md5 from 'md5';
 
 function Settings() {
     const [masterKey, setMasterKey] = React.useState('');
     const [showProgress, setShowProgress] = React.useState(false);
+    const [progressValue, setProgressValue] = React.useState(0);
+    const [snackbarVisible, setSnackbarVisible] = React.useState(false);
+    const db = new DatabaseHandler();
     function handleMasterKeyUpdate() {
         // setMasterKey(text);
+        if (masterKey === '')
+            return;
         setShowProgress(true);
-        setTimeout(() => {
-            setShowProgress(false);
-        }, 3000);
-        console.log('Master key updated');
+        // Do your background work...
+
+        Encryption.getKey().then((key) => {
+            // setEncryptionKey(key!);
+            // db.createTable();
+            db.getAllData(async (data: any) => {
+                const total: number = data.length;
+                let index = 0;
+                Encryption.generateKey(masterKey, md5(masterKey), 1000, 256).then(async (aesKey) => {
+                    await (async () => {
+                        for (const d of data){
+ 
+                            const reencrypted = JSON.stringify(await Encryption.encryptData(d.password, aesKey));
+                            // console.log(reencrypted);
+                            db.updateData(d.id, d.url, d.username, reencrypted, ()=>{
+                                setProgressValue((index + 1) / total);
+                                index += 1;
+                            });
+
+
+                        }
+
+
+                    })()
+                    // store encryption key
+                    Encryption.storeKey(aesKey);
+                    setSnackbarVisible(true);
+                    setShowProgress(false);
+
+                });
+                
+            }, key!);
+        });
     }
     return (
         <>
@@ -24,11 +63,16 @@ function Settings() {
             </View>
             <Modal presentationStyle='overFullScreen' style={{ alignContent: 'center' }} visible={showProgress} transparent={true} >
                 <View style={styles.progressContainer}>
-                    <ProgressBar style={styles.ProgressBar} progress={0.5} color={MD3Colors.primary50} />
-                    <Text style={{color:'white', alignSelf:'center'}}>Re-encrypting database</Text>
+                    <ProgressBar style={styles.ProgressBar} progress={progressValue} color={MD3Colors.primary50} />
+                    <Text style={{ color: 'white', alignSelf: 'center' }}>Re-encrypting database. Do Not Close The App!</Text>
                 </View>
 
             </Modal>
+            <Notification
+                    visible={snackbarVisible}
+                    onDismiss={() => setSnackbarVisible(false)}
+                    message='Master Key Updated'
+            />
         </>
 
     );
