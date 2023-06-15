@@ -8,7 +8,10 @@ import Encryption from '../model/Encryption';
 import DatabaseHandler from '../model/Credential';
 import Notification from './Notification';
 import md5 from 'md5';
-
+import MasterKey from '../model/MasterKey';
+function sleep(ms: number) {
+    return new Promise((resolve: any) => setTimeout(resolve, ms));
+  }
 function Settings() {
     const [masterKey, setMasterKey] = React.useState('');
     const [showProgress, setShowProgress] = React.useState(false);
@@ -16,37 +19,28 @@ function Settings() {
     const [snackbarVisible, setSnackbarVisible] = React.useState(false);
     const db = new DatabaseHandler();
     function handleMasterKeyUpdate() {
-        // setMasterKey(text);
         if (masterKey === '')
             return;
         setShowProgress(true);
         // Do your background work...
 
         Encryption.getKey().then((key) => {
-            // setEncryptionKey(key!);
-            // db.createTable();
             db.getAllData(async (data: any) => {
                 const total: number = data.length;
                 let index = 0;
                 Encryption.generateKey(masterKey, md5(masterKey), 1000, 256).then(async (aesKey) => {
                     await (async () => {
                         for (const d of data){
- 
                             const reencrypted = JSON.stringify(await Encryption.encryptData(d.password, aesKey));
-                            // console.log(reencrypted);
                             db.updateData(d.id, d.url, d.username, reencrypted, ()=>{
                                 setProgressValue((index + 1) / total);
                                 index += 1;
                             });
-
-
                         }
-
-
+                        await MasterKey.storeMasterKey(masterKey);
+                        Encryption.storeKey(aesKey);
                     })()
-                    // store encryption key
-                    Encryption.storeKey(aesKey);
-                    setSnackbarVisible(true);
+                    await sleep(500);
                     setShowProgress(false);
 
                 });

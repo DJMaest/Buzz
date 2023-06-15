@@ -59,6 +59,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
     const [searchText, setSearchText] = React.useState<string>('');
     const [passData, setPassData] = React.useState<any[]>([]);
     const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
+    const [snackMessage, setSnackMessage] = React.useState<string>('');
     // combine the edit text into a signle object state
     const [editData, setEditData] = React.useState<EditData>({ url: '', username: '', password: '', id: -1 });
     const [editVisible, setEditVisible] = React.useState<boolean>(false);
@@ -132,12 +133,16 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
 
     async function editCredential(): Promise<void> {
         if (Object.values(editData).includes('')) {
+            setSnackMessage('No field can be empty');
             setSnackbarVisible(true);
             return;
         }
         Encryption.getKey().then(async (key) => {
             const encryptedPassword = JSON.stringify(await Encryption.encryptData(editData.password, key!));
-            db.updateData(editData.id, editData.url, editData.username, encryptedPassword);
+            db.updateData(editData.id, editData.url, editData.username, encryptedPassword, () => {
+                setSnackMessage('Credential updated');
+                setSnackbarVisible(true);
+            });
             filterCredential(searchText);
             hideEditModal();
         })
@@ -147,6 +152,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
 
     async function addCredential(url: string, username: string, password: string): Promise<void> {
         if (url === '' || username === '' || password === '') {
+            setSnackMessage('No field can be empty');
             setSnackbarVisible(true);
             return;
         }
@@ -169,9 +175,9 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
         setAddData({ ...addData, password: text });
     }
 
-    function generatePassword(){
+    function generatePassword() {
         const password = generatePasswordString();
-        setAddData({...addData, password: password});
+        setAddData({ ...addData, password: password });
     }
 
     return (
@@ -210,11 +216,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
                     <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={async () => await addCredential(addData.url, addData.username, addData.password)}> Add </Button>
                     <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Cancel </Button>
                 </Modal>
-                <Notification
-                    visible={snackbarVisible}
-                    onDismiss={() => setSnackbarVisible(false)}
-                    message='No field can be empty'
-                />
+
 
                 {/* Delete modal */}
 
@@ -240,7 +242,11 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
                 </Modal>
 
             </SafeAreaView>
-
+            <Notification
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                message={snackMessage}
+            />
         </PaperProvider >
 
     );
