@@ -26,8 +26,8 @@ import DatabaseHandler from '../model/Credential';
 import Notification from './Notification';
 import { StackActions } from '@react-navigation/routers';
 import Encryption from '../model/Encryption';
-
-
+import Clipboard from '@react-native-clipboard/clipboard';
+import isUrl from 'is-url';
 type EditData = {
     url: string;
     username: string;
@@ -41,6 +41,17 @@ type AddData = {
     password: string;
 }
 
+// This function generates a random password
+function generatePasswordString(): string {
+    const length = 16;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]\:;?><,./-=';
+    let retVal = '';
+    for (let i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    return retVal;
+}
+
 function Home({ navigation }: { navigation: any }): JSX.Element {
     const [visible, setVisible] = React.useState<boolean>(false);
     const [deleteVisible, setDeleteVisible] = React.useState<boolean>(false);
@@ -49,6 +60,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
     const [searchText, setSearchText] = React.useState<string>('');
     const [passData, setPassData] = React.useState<any[]>([]);
     const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
+    const [snackMessage, setSnackMessage] = React.useState<string>('');
     // combine the edit text into a signle object state
     const [editData, setEditData] = React.useState<EditData>({ url: '', username: '', password: '', id: -1 });
     const [editVisible, setEditVisible] = React.useState<boolean>(false);
@@ -56,6 +68,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
     const [visibleEye, setVisibleEye] = React.useState<boolean>(true);
     const [encryptionKey, setEncryptionKey] = React.useState<string>('');
     const db = new DatabaseHandler();
+    const [urlError, setUrlError] = React.useState<string>('');
     useEffect(() => {
         Encryption.getKey().then((key) => {
             setEncryptionKey(key!);
@@ -106,6 +119,13 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
         setVisibleEye(!visibleEye);
     }
 
+    const validateUrl = (url: string) => {
+        if (isUrl(url)||url=='') {
+          setUrlError('');
+        } else {
+          setUrlError('Notice the entered URL is invalid');
+        }
+      };      
 
     function filterCredential(text: string): void {
         setSearchText(text);
@@ -122,12 +142,16 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
 
     async function editCredential(): Promise<void> {
         if (Object.values(editData).includes('')) {
+            setSnackMessage('No field can be empty');
             setSnackbarVisible(true);
             return;
         }
         Encryption.getKey().then(async (key) => {
             const encryptedPassword = JSON.stringify(await Encryption.encryptData(editData.password, key!));
-            db.updateData(editData.id, editData.url, editData.username, encryptedPassword);
+            db.updateData(editData.id, editData.url, editData.username, encryptedPassword, () => {
+                setSnackMessage('Credential updated');
+                setSnackbarVisible(true);
+            });
             filterCredential(searchText);
             hideEditModal();
         })
@@ -137,6 +161,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
 
     async function addCredential(url: string, username: string, password: string): Promise<void> {
         if (url === '' || username === '' || password === '') {
+            setSnackMessage('No field can be empty');
             setSnackbarVisible(true);
             return;
         }
@@ -159,20 +184,15 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
         setAddData({ ...addData, password: text });
     }
 
+    function generatePassword() {
+        const password = generatePasswordString();
+        setAddData({ ...addData, password: password });
+    }
+
     return (
         <PaperProvider theme={customTheme}>
             <SafeAreaView style={styles.container}>
-                <Appbar style={styles.appBar}>
 
-                    <Appbar.Content color={customTheme.colors.primary} title="Buzz" />
-
-                    {/* TODO: BLE sync feature coming in next release  */}
-                    {/* <Icon color={customTheme.colors.primary} name="logout" size={24} style={styles.appBarIcon} /> */}
-                    <IconButton iconColor={customTheme.colors.primary} icon="logout" size={24} onPress={() => {
-                        navigation.dispatch(StackActions.popToTop())
-                    }} />
-
-                </Appbar>
                 <Searchbar onChangeText={filterCredential} style={styles.searchBar} placeholder='Search for credentials' value={searchText} />
                 <ScrollView style={styles.passContainer}>
                     {passData !== undefined && passData.map((item: any) => {
@@ -194,21 +214,19 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
                 />
                 {/* Add modal */}
                 <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
-                    <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={setUrlText} value={addData.url} placeholder='Enter URL' label="URL" />
+                    <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={(text) => {setUrlText(text);validateUrl(text);}} value={addData.url} placeholder='Enter URL' label="URL" />
+                    {urlError !== '' && <Text style={styles.errorMessage}>{urlError}</Text>}
                     <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={setUserNameText} value={addData.username} placeholder='Enter Username' label="Username" />
                     <View style={styles.passFieldContainer}>
                         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.passInput} onChangeText={setPasswordText} value={addData.password} placeholder='Enter Password' label="Password" secureTextEntry={visibleEye} />
                         <IconButton style={styles.viewIcon} iconColor='black' icon={eyeIcon} size={24} onPress={() => viewPass()} />
+                        <IconButton style={styles.generateIcon} iconColor='black' icon={'refresh'} size={24} onPress={generatePassword} />
                     </View>
 
                     <Button buttonColor={customTheme.colors.inversePrimary} style={styles.containerBtn} mode="contained" onPress={async () => await addCredential(addData.url, addData.username, addData.password)}> Add </Button>
                     <Button style={styles.containerBtn} mode="contained" onPress={() => hideModal()}> Cancel </Button>
                 </Modal>
-                <Notification
-                    visible={snackbarVisible}
-                    onDismiss={() => setSnackbarVisible(false)}
-                    message='No field can be empty'
-                />
+
 
                 {/* Delete modal */}
 
@@ -234,7 +252,11 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
                 </Modal>
 
             </SafeAreaView>
-
+            <Notification
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                message={snackMessage}
+            />
         </PaperProvider >
 
     );
@@ -282,6 +304,12 @@ const styles = StyleSheet.create({
     },
     viewIcon: {
         margin: 0,
+        marginLeft: -5,
+        marginTop: 10,
+    },
+    generateIcon: {
+        marginRight: 40,
+        marginLeft: -10,
         marginTop: 10,
     },
     passInput: {
