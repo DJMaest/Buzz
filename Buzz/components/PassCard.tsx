@@ -82,8 +82,8 @@ function PassCard(props: Props): JSX.Element {
         setEyeIcon(eyeIcon === 'eye'? 'eye-off': 'eye');
         setVisible(!visible);
     }
-    function copyPass(pass: string) {
-        Clipboard.setString(pass);
+    function copyPassOrUsername(passOrUsrnm: string) {
+        Clipboard.setString(passOrUsrnm);
     }
     return (
         <>
@@ -93,12 +93,19 @@ function PassCard(props: Props): JSX.Element {
                     <View style={styles.passInfoContainer}>
                         <Title>{url}</Title>
                         <View style={styles.dataFieldContainer}>
-                            <TextInput
-                                style={styles.passField}
-                                disabled={true}
-                                secureTextEntry={false}
-                                value={username}
-                            />
+                            <View style={styles.passFieldContainer}>
+                                <TextInput
+                                    style={styles.passField}
+                                    disabled={true}
+                                    secureTextEntry={false}
+                                    value={username}
+                                />
+                                {/* Use Icon button */}
+                                <IconButton style={styles.viewIcon} iconColor='black' icon="content-copy" size={24} onPress={() => copyPassOrUsername(props.username)} />
+                            </View>
+
+
+
                             <View style={styles.passFieldContainer}>
                                 <TextInput
                                     style={styles.passField}
@@ -108,7 +115,7 @@ function PassCard(props: Props): JSX.Element {
                                 />
                                 {/* Use Icon button */}
                                 <IconButton style={styles.viewIcon} iconColor='black' icon={eyeIcon} size={24} onPress={() => viewPass() } />
-                                <IconButton style={styles.viewIcon} iconColor='black' icon="content-copy" size={24} onPress={() => copyPass(props.password)} />
+                                <IconButton style={styles.viewIcon} iconColor='black' icon="content-copy" size={24} onPress={() => copyPassOrUsername(props.password)} />
                             </View>
 
                         </View>
