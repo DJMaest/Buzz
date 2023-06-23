@@ -215,7 +215,7 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
                 {/* Add modal */}
                 <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
                     <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={(text) => {setUrlText(text);validateUrl(text);}} value={addData.url} placeholder='Enter URL' label="URL" />
-                    {urlError !== '' && <Text style={styles.errorMessage}>{urlError}</Text>}
+                    {urlError !== '' && <Text style={styles.errorStyle}>{urlError}</Text>}
                     <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={setUserNameText} value={addData.username} placeholder='Enter Username' label="Username" />
                     <View style={styles.passFieldContainer}>
                         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.passInput} onChangeText={setPasswordText} value={addData.password} placeholder='Enter Password' label="Password" secureTextEntry={visibleEye} />
@@ -240,7 +240,8 @@ function Home({ navigation }: { navigation: any }): JSX.Element {
                 {/* Edit modal */}
 
                 <Modal visible={editVisible} onDismiss={hideEditModal} contentContainerStyle={styles.containerStyle}>
-                    <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={setUrlEditText} value={editData.url} placeholder='Enter URL' label="URL" />
+                    <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={(text) => {setUrlEditText(text);validateUrl(text);}} value={editData.url} placeholder='Enter URL' label="URL" />
+                    {urlError !== '' && <Text style={styles.errorStyle}>{urlError}</Text>}
                     <TextInput autoCapitalize='none' autoCorrect={false} style={styles.containerInput} onChangeText={setUsernameEditText} value={editData.username} placeholder='Enter Username' label="Username" />
                     <View style={styles.passFieldContainer}>
                         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.passInput} onChangeText={setPasswordEditText} value={editData.password} placeholder='Enter Password' label="Password" secureTextEntry={visibleEye} />
@@ -266,6 +267,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    errorStyle: {
+        color: 'grey',
+        marginLeft:5,
+        fontWeight: 'bold',
+        fontSize: 14,
+      },
     fab: {
         position: 'absolute',
         margin: 16,
